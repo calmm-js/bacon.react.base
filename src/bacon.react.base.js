@@ -115,7 +115,7 @@ function B() {
   } else {
     for (let i=0; i<n; ++i) {
       const x = arguments[i]
-      const c = c && c.constructor
+      const c = x && x.constructor
       if (c === Object || c === Array)
         arguments[i] = Bacon.combineTemplate(x)
     }
