@@ -1,12 +1,13 @@
 {
   "name": "bacon.react.base",
-  "version": "1.0.0",
-  "description": "JSX with Bacon",
+  "version": "1.0.1",
+  "description": "JSX with Bacon, yummy?",
   "main": "lib/bacon.react.base.js",
   "scripts": {
     "dist": "babel src --source-maps inline --out-dir lib",
     "lint": "eslint src test",
-    "prepublish": "npm run lint && npm run dist"
+    "prepublish": "npm run lint && npm run test && npm run dist",
+    "test": "node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,8 @@
     "babel-plugin-transform-es2015-modules-commonjs": "^6.3.16",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-stage-2": "^6.3.13",
-    "eslint": "^1.10.3"
+    "eslint": "^1.10.3",
+    "mocha": "^2.3.4",
+    "ramda": "^0.19.1"
   }
 }
