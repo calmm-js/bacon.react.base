@@ -4,7 +4,7 @@ import React from "react"
 
 // Lifting
 
-const nullState = {dispose: null, combined: null}
+const nullState = {dispose: null, props: null, children: null}
 
 const common = {
   getInitialState() {
@@ -21,8 +21,9 @@ const common = {
   componentWillMount() {
     this.trySubscribe(this.props)
   },
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextState.combined !== this.state.combined
+  shouldComponentUpdate(np, ns) {
+    const ts = this.state
+    return ns.props !== ts.props || ns.children !== ts.children
   },
   componentWillUnmount() {
     this.tryDispose()
@@ -39,11 +40,11 @@ const FromBacon = React.createClass({
     this.tryDispose()
 
     this.setState({dispose: toProperty(bacon).onValue(
-      combined => this.setState({combined})
+      children => this.setState({children})
     )})
   },
   render() {
-    return this.state.combined
+    return this.state.children
   }
 })
 
@@ -87,14 +88,12 @@ const FromClass = React.createClass({
         const val = obsVals[i]
         if ("children" === key) {children = val} else {props[key] = val}
       }
-      this.setState({combined: {props, children}})
+      this.setState({props, children})
     })})
   },
   render() {
-    const {combined} = this.state
-    return combined && React.createElement(this.props.Class,
-                                           combined.props,
-                                           combined.children)
+    const {props, children} = this.state
+    return props && React.createElement(this.props.Class, props, children)
   }
 })
 
