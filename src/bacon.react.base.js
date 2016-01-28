@@ -1,4 +1,5 @@
 import Bacon from "baconjs"
+import R     from "ramda"
 import React from "react"
 
 // Lifting
@@ -119,7 +120,7 @@ function B() {
       if (c === Object || c === Array)
         arguments[i] = Bacon.combineTemplate(x)
     }
-    return Bacon.combineWith.apply(Bacon, arguments)
+    return Bacon.combineWith.apply(Bacon, arguments).skipDuplicates(R.equals)
   }
 }
 
