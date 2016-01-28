@@ -39,7 +39,7 @@ const FromBacon = React.createClass({
   trySubscribe({bacon}) {
     this.tryDispose()
 
-    this.setState({dispose: toProperty(bacon).onValue(
+    this.setState({dispose: bacon.onValue(
       children => this.setState({children})
     )})
   },
@@ -50,6 +50,9 @@ const FromBacon = React.createClass({
 
 export const fromBacon = bacon =>
   React.createElement(FromBacon, {bacon})
+
+const combineAsArray = obs =>
+  obs.length === 1 ? obs[0].map(x => [x]) : Bacon.combineAsArray(obs)
 
 const FromClass = React.createClass({
   ...common,
@@ -76,7 +79,7 @@ const FromClass = React.createClass({
       }
     }
 
-    this.setState({dispose: Bacon.combineAsArray(obsStreams).onValue(obsVals => {
+    this.setState({dispose: combineAsArray(obsStreams).onValue(obsVals => {
       const props = {}
       let children = null
       for (const key in vals) {
@@ -118,6 +121,12 @@ function B() {
       const c = x && x.constructor
       if (c === Object || c === Array)
         arguments[i] = Bacon.combineTemplate(x)
+    }
+    if (2 === n) {
+      if (arguments[0] instanceof Bacon.Observable)
+        return toProperty(arguments[0]).map(arguments[1]).skipDuplicates(R.equals)
+      if (arguments[1] instanceof Bacon.Observable)
+        return toProperty(arguments[1]).map(arguments[0]).skipDuplicates(R.equals)
     }
     return Bacon.combineWith.apply(Bacon, arguments).skipDuplicates(R.equals)
   }
