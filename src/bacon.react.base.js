@@ -4,7 +4,11 @@ import React from "react"
 
 // Lifting
 
-const nullState = {dispose: null, props: null, children: null}
+export const config = {
+  onError: e => {throw e}
+}
+
+const nullState = {dispose: null, rendered: null}
 
 const common = {
   getInitialState() {
@@ -22,12 +26,14 @@ const common = {
     this.trySubscribe(this.props)
   },
   shouldComponentUpdate(np, ns) {
-    const ts = this.state
-    return ns.props !== ts.props || ns.children !== ts.children
+    return ns.rendered !== this.state.rendered
   },
   componentWillUnmount() {
     this.tryDispose()
     this.setState(nullState)
+  },
+  render() {
+    return this.state.rendered
   }
 }
 
@@ -39,12 +45,15 @@ const FromBacon = React.createClass({
   trySubscribe({bacon}) {
     this.tryDispose()
 
-    this.setState({dispose: bacon.onValue(
-      children => this.setState({children})
-    )})
-  },
-  render() {
-    return this.state.children
+    this.setState({dispose: bacon.subscribe(ev => {
+      if (ev.hasValue()) {
+        this.setState({rendered: ev.value()})
+      } else if (ev.isError()) {
+        config.onError(ev.error)
+      } else {
+        this.setState(nullState)
+      }
+    })})
   }
 })
 
@@ -79,24 +88,29 @@ const FromClass = React.createClass({
       }
     }
 
-    this.setState({dispose: combineAsArray(obsStreams).onValue(obsVals => {
-      const props = {}
-      let children = null
-      for (const key in vals) {
-        const val = vals[key]
-        if ("children" === key) {children = val} else {props[key] = val}
+    this.setState({dispose: combineAsArray(obsStreams).subscribe(ev => {
+      if (ev.hasValue()) {
+        const obsVals = ev.value()
+        const props = {}
+        let children = null
+        for (const key in vals) {
+          const val = vals[key]
+          if ("children" === key) {children = val} else {props[key] = val}
+        }
+        for (let i=0, n=obsKeys.length; i<n; ++i) {
+          const key = obsKeys[i]
+          const val = obsVals[i]
+          if ("children" === key) {children = val} else {props[key] = val}
+        }
+        this.setState({rendered: React.createElement(this.props.Class,
+                                                     props,
+                                                     children)})
+      } else if (ev.isError()) {
+        config.onError(ev.error)
+      } else {
+        this.setState(nullState)
       }
-      for (let i=0, n=obsKeys.length; i<n; ++i) {
-        const key = obsKeys[i]
-        const val = obsVals[i]
-        if ("children" === key) {children = val} else {props[key] = val}
-      }
-      this.setState({props, children})
     })})
-  },
-  render() {
-    const {props, children} = this.state
-    return props && React.createElement(this.props.Class, props, children)
   }
 })
 
