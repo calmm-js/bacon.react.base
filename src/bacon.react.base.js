@@ -8,6 +8,7 @@ export const config = {
   onError: e => {throw e}
 }
 
+const nullDispose = {dispose: null}
 const nullState = {dispose: null, rendered: null}
 
 const common = {
@@ -51,7 +52,7 @@ const FromBacon = React.createClass({
       } else if (ev.isError()) {
         config.onError(ev.error)
       } else {
-        this.setState(nullState)
+        this.setState(nullDispose)
       }
     })})
   }
@@ -108,7 +109,7 @@ const FromClass = React.createClass({
       } else if (ev.isError()) {
         config.onError(ev.error)
       } else {
-        this.setState(nullState)
+        this.setState(nullDispose)
       }
     })})
   }
