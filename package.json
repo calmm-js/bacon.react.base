@@ -1,6 +1,6 @@
 {
   "name": "bacon.react.base",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "JSX with Bacon, yummy?",
   "main": "lib/bacon.react.base.js",
   "scripts": {
