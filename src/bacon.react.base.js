@@ -125,6 +125,17 @@ export const fromClasses = classes => {
   return result
 }
 
+export const fromIds = (ids, fromId) => ids.scan([{}, []], ([oldIds], ids) => {
+  const newIds = {}
+  const newVs = []
+  ids.forEach(id => {
+    const newV = id in oldIds ? oldIds[id] : fromId(id)
+    newIds[id] = newV
+    newVs.push(newV)
+  })
+  return [newIds, newVs]
+}).map(s => s[1])
+
 function B() {
   const n = arguments.length
   if (1 === n) {
