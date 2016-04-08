@@ -127,17 +127,15 @@ export const fromClasses = classes => {
 
 export const fromIds = (ids, fromId) => ids.scan([{}, []], ([oldIds], ids) => {
   const newIds = {}
-  const newVs = []
-  ids.forEach(id => {
-    let newV
-    if (id in newIds) {
-      newV = newIds[id]
-    } else {
-      newV = id in oldIds ? oldIds[id] : fromId(id)
-      newIds[id] = newV
-    }
-    newVs.push(newV)
-  })
+  const newVs = Array(ids.length)
+  for (let i=0, n=ids.length; i<n; ++i) {
+    const id = ids[i]
+    const k = id.toString()
+    if (k in newIds)
+      newVs[i] = newIds[k]
+    else
+      newIds[k] = newVs[i] = k in oldIds ? oldIds[k] : fromId(id)
+  }
   return [newIds, newVs]
 }).map(s => s[1])
 
