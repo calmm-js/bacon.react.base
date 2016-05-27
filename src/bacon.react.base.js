@@ -1,6 +1,6 @@
-import Bacon from "baconjs"
-import R     from "ramda"
-import React from "react"
+import Bacon  from "baconjs"
+import * as R from "ramda"
+import React  from "react"
 
 // Lifting
 
@@ -11,28 +11,29 @@ export const config = {
 const nullDispose = {dispose: null}
 const nullState = {dispose: null, rendered: null}
 
-const common = {
-  getInitialState() {
-    return nullState
-  },
+class LiftedComponent extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = nullState
+  }
   tryDispose() {
     const {dispose} = this.state
     if (dispose)
       dispose()
-  },
+  }
   componentWillReceiveProps(nextProps) {
     this.trySubscribe(nextProps)
-  },
+  }
   componentWillMount() {
     this.trySubscribe(this.props)
-  },
+  }
   shouldComponentUpdate(np, ns) {
     return ns.rendered !== this.state.rendered
-  },
+  }
   componentWillUnmount() {
     this.tryDispose()
     this.setState(nullState)
-  },
+  }
   render() {
     return this.state.rendered
   }
@@ -41,8 +42,10 @@ const common = {
 const toProperty = obs =>
   obs instanceof Bacon.EventStream ? obs.toProperty() : obs
 
-const FromBacon = React.createClass({
-  ...common,
+class FromBacon extends LiftedComponent {
+  constructor(props) {
+    super(props)
+  }
   trySubscribe({bacon}) {
     this.tryDispose()
 
@@ -56,7 +59,7 @@ const FromBacon = React.createClass({
       }
     })})
   }
-})
+}
 
 export const fromBacon = bacon =>
   React.createElement(FromBacon, {bacon})
@@ -64,8 +67,10 @@ export const fromBacon = bacon =>
 const combineAsArray = obs =>
   obs.length === 1 ? obs[0].map(x => [x]) : Bacon.combineAsArray(obs)
 
-const FromClass = React.createClass({
-  ...common,
+class FromClass extends LiftedComponent {
+  constructor(props) {
+    super(props)
+  }
   trySubscribe({props}) {
     this.tryDispose()
 
@@ -113,7 +118,7 @@ const FromClass = React.createClass({
       }
     })})
   }
-})
+}
 
 export const fromClass =
   Class => props => React.createElement(FromClass, {Class, props})
